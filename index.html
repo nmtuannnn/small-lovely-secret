@@ -1,0 +1,990 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bức Thư Gửi Bạn</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@500;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,500&display=swap">
+<style>
+/* Layout: ba "trang" trên mặt bàn gỗ trầm — bức thư niêm sáp, cuốn album kỷ niệm, và phiếu thang đo tình yêu. Một giao diện cố định (không đổi theo theme). */
+:root {
+  --wood: #3a2518;
+  --wood-2: #1f130c;
+  --env: #e6d3ac;
+  --env-dark: #c9ad7c;
+  --parch: #f1e4c6;
+  --ink: #3b2414;
+  --ink-soft: #6b4a2e;
+  --rule: rgba(120,80,35,.30);
+  --wax: #8e1f22;
+  --wax-hi: #c0443b;
+  --gold: #b08a4a;
+  --muted: #b9a283;
+  --font-script: "Great Vibes", "Dancing Script", "Segoe Script", cursive;
+  --font-text: "Cormorant Garamond", "Garamond", Georgia, serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background-color: var(--wood-2);
+  background-image:
+    radial-gradient(ellipse at 50% 25%, rgba(255,200,140,.10) 0%, transparent 60%),
+    repeating-linear-gradient(92deg, rgba(0,0,0,.10) 0 2px, transparent 2px 9px, rgba(255,255,255,.025) 9px 10px, transparent 10px 23px),
+    linear-gradient(180deg, var(--wood) 0%, var(--wood-2) 100%);
+  background-attachment: fixed;
+  color: var(--parch);
+  font-family: var(--font-text);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 60px;
+  overflow-x: hidden;
+}
+.page { width: min(860px, 100%); margin: 0 auto; display: grid; gap: 30px; justify-items: center; }
+button, input, textarea { font-family: inherit; }
+
+/* ---------- Điều hướng ---------- */
+.nav {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+  gap: 4px 6px;
+  font-size: 1.15rem;
+}
+.nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-style: italic;
+  padding: 6px 12px;
+  border-bottom: 1px solid transparent;
+  transition: color .2s, border-color .2s;
+}
+.nav a:hover { color: var(--parch); }
+.nav a[aria-current="page"] { color: var(--parch); border-bottom-color: var(--gold); }
+.nav a:focus-visible { outline: 1px solid var(--gold); outline-offset: 2px; }
+.nav .sep { color: var(--gold); font-size: .9rem; }
+
+.view { width: 100%; display: grid; gap: 28px; justify-items: center; }
+.view[hidden] { display: none; }
+
+.hint {
+  font-style: italic; color: var(--muted);
+  font-size: 1.1rem; letter-spacing: .03em;
+  margin: 0; text-align: center;
+}
+.hint span { color: var(--gold); padding-inline: 8px; }
+
+/* ---------- Phong bì ---------- */
+.stage { width: min(560px, 100%); position: relative; }
+.envelope {
+  position: relative; width: 100%; aspect-ratio: 16 / 10; max-width: 100%;
+  border: 0; padding: 0; background: none; cursor: pointer; display: block;
+  transform: rotate(-1.5deg); transition: transform .5s ease;
+}
+.envelope:hover { transform: rotate(-0.5deg) translateY(-4px); }
+.envelope:focus-visible { outline: 2px solid var(--gold); outline-offset: 10px; }
+.env-paper {
+  position: absolute; inset: 0; border-radius: 2px;
+  background-color: var(--env);
+  background-image:
+    radial-gradient(ellipse at 20% 80%, rgba(140,95,40,.18), transparent 45%),
+    radial-gradient(ellipse at 85% 15%, rgba(140,95,40,.14), transparent 40%),
+    radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(110,70,30,.28) 100%);
+  box-shadow: 0 26px 50px rgba(0,0,0,.55), 0 3px 8px rgba(0,0,0,.3);
+  overflow: hidden;
+}
+.env-paper::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(to top right, transparent calc(50% - 1px), rgba(110,75,35,.28) 50%, transparent calc(50% + 1px)) left bottom / 50% 62% no-repeat,
+    linear-gradient(to top left, transparent calc(50% - 1px), rgba(110,75,35,.28) 50%, transparent calc(50% + 1px)) right bottom / 50% 62% no-repeat;
+}
+.flap, .flap-shadow {
+  position: absolute; left: 0; right: 0; top: 0; height: 58%;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+.flap { background: linear-gradient(180deg, #ecdcb9 0%, var(--env-dark) 100%); }
+.flap-shadow { background: rgba(70,40,15,.25); transform: translateY(3px); }
+.stamp {
+  position: absolute; right: 5%; top: 7%;
+  width: clamp(52px, 13vw, 72px); aspect-ratio: 4 / 5; max-width: 100%;
+  background: #efe2c4; padding: 4px;
+  -webkit-mask: radial-gradient(circle 2.6px at 2.6px 2.6px, transparent 98%, #000) -2.6px -2.6px / 7px 7px;
+          mask: radial-gradient(circle 2.6px at 2.6px 2.6px, transparent 98%, #000) -2.6px -2.6px / 7px 7px;
+  transform: rotate(4deg); z-index: 2;
+}
+.stamp-inner {
+  width: 100%; height: 100%;
+  border: 1px solid #6e4a2b;
+  background: radial-gradient(circle at 50% 45%, #a77a52 0%, #6e4a2b 75%);
+  display: grid; place-items: center; align-content: center;
+  color: #f1e4c6; font-family: var(--font-script);
+  font-size: clamp(1.4rem, 5vw, 1.9rem); line-height: 1;
+}
+.stamp-inner small { display: block; font-family: var(--font-text); font-size: .42rem; letter-spacing: .2em; margin-top: 3px; }
+.postmark {
+  position: absolute; right: 16%; top: 13%;
+  width: clamp(58px, 14vw, 80px); aspect-ratio: 1; max-width: 100%;
+  border: 1.5px solid rgba(70,40,20,.45); border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: clamp(.55rem, 1.7vw, .7rem); letter-spacing: .08em;
+  color: rgba(70,40,20,.6); text-align: center; line-height: 1.25;
+  transform: rotate(-16deg); z-index: 3; pointer-events: none;
+}
+.address {
+  position: absolute; left: 50%; top: 74%; translate: -50% 0;
+  width: min(72%, 340px); text-align: center; color: var(--ink);
+  display: grid; gap: 2px;
+}
+.address .to-label { font-style: italic; font-size: clamp(.85rem, 2.4vw, 1rem); color: var(--ink-soft); }
+.address .to-name { font-family: var(--font-script); font-size: clamp(1.8rem, 6.5vw, 2.7rem); line-height: 1.1; overflow-wrap: anywhere; }
+.seal {
+  position: absolute; left: 50%; top: 58%; translate: -50% -50%;
+  width: clamp(54px, 13vw, 70px); aspect-ratio: 1; max-width: 100%; z-index: 4;
+  border-radius: 47% 53% 50% 50% / 52% 48% 52% 48%;
+  background: radial-gradient(circle at 35% 30%, var(--wax-hi), var(--wax) 55%, #5a1215 100%);
+  box-shadow: 0 4px 8px rgba(0,0,0,.4), inset 0 -3px 6px rgba(0,0,0,.35), inset 0 2px 3px rgba(255,180,160,.25);
+  display: grid; place-items: center;
+  transition: opacity .35s ease, transform .45s ease;
+}
+.seal::before {
+  content: ""; position: absolute; inset: 16%; border-radius: 50%;
+  border: 1.5px solid rgba(60,8,10,.55); box-shadow: 0 1px 0 rgba(255,170,150,.25);
+}
+.seal span {
+  font-family: var(--font-script); font-size: clamp(1.4rem, 4.6vw, 1.9rem);
+  color: #4a0c0e; text-shadow: 0 1px 0 rgba(255,170,150,.35); line-height: 1; position: relative;
+}
+
+/* ---------- Giấy (dùng chung) ---------- */
+.paper {
+  width: 100%; position: relative; color: var(--ink);
+  background-color: var(--parch);
+  background-image:
+    radial-gradient(ellipse at 15% 10%, rgba(150,100,45,.16), transparent 35%),
+    radial-gradient(ellipse at 90% 85%, rgba(150,100,45,.20), transparent 40%),
+    radial-gradient(ellipse at 70% 30%, rgba(150,100,45,.08), transparent 30%),
+    radial-gradient(ellipse at 50% 50%, transparent 58%, rgba(120,80,35,.38) 100%);
+  box-shadow: 0 30px 60px rgba(0,0,0,.55), 0 2px 6px rgba(0,0,0,.3), inset 0 0 0 1px rgba(120,80,35,.25);
+  padding-block: clamp(36px, 8vw, 64px) clamp(40px, 8vw, 64px);
+  padding-inline: clamp(24px, 8vw, 68px);
+}
+.paper::before {
+  content: ""; position: absolute; inset: clamp(10px, 2.5vw, 18px);
+  border: 1px solid rgba(120,80,35,.35);
+  outline: 1px solid rgba(120,80,35,.18); outline-offset: 4px;
+  pointer-events: none;
+}
+.paper > * { position: relative; }
+
+/* ---------- Lá thư ---------- */
+.letter-wrap { width: min(640px, 100%); display: grid; gap: 22px; justify-items: center; }
+.letter { transform: rotate(0.4deg); }
+.letter::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(to bottom, transparent calc(33.3% - 1px), rgba(90,55,20,.12) 33.3%, rgba(255,245,220,.5) calc(33.3% + 1px), transparent calc(33.3% + 2px)),
+    linear-gradient(to bottom, transparent calc(66.6% - 1px), rgba(90,55,20,.12) 66.6%, rgba(255,245,220,.5) calc(66.6% + 1px), transparent calc(66.6% + 2px));
+}
+.letter-date { font-style: italic; font-size: clamp(1rem, 2.8vw, 1.15rem); text-align: right; margin: 0 0 18px; color: var(--ink-soft); }
+.letter-greeting { font-family: var(--font-script); font-size: clamp(2rem, 7vw, 2.8rem); line-height: 1.2; margin: 0 0 10px; overflow-wrap: anywhere; }
+
+/* Phần thư có dòng kẻ: mọi chiều cao dòng là bội số của --line */
+.ruled {
+  --line: clamp(2rem, 6.2vw, 2.35rem);
+  background-image: repeating-linear-gradient(to bottom,
+    transparent 0 calc(var(--line) - 1px),
+    var(--rule) calc(var(--line) - 1px) var(--line));
+  background-position: 0 -4px;
+}
+.letter-body {
+  font-style: italic; font-weight: 500;
+  font-size: clamp(1.2rem, 3.8vw, 1.42rem);
+  line-height: var(--line);
+  max-width: 60ch;
+}
+.letter-body p { margin: 0; text-indent: 2em; overflow-wrap: anywhere; }
+.letter-body p:first-child::first-letter {
+  font-family: var(--font-script); font-style: normal;
+  font-size: 2.1em; line-height: 0; color: var(--wax); padding-right: 2px;
+}
+.fleuron {
+  text-align: center; color: var(--gold);
+  font-size: 1.3rem; line-height: var(--line); height: var(--line);
+  letter-spacing: .6em; padding-left: .6em; margin: 0;
+}
+.letter-closing { text-align: right; display: grid; justify-items: end; }
+.letter-closing .close-word { font-style: italic; font-size: clamp(1.2rem, 3.8vw, 1.42rem); line-height: var(--line); margin: 0; }
+.letter-closing .signature {
+  font-family: var(--font-script); font-size: clamp(2.2rem, 8vw, 3.1rem);
+  line-height: calc(var(--line) * 2); margin: 0;
+  transform: rotate(-4deg); overflow-wrap: anywhere;
+}
+.ps { font-style: italic; font-size: clamp(1.05rem, 3.2vw, 1.2rem); line-height: var(--line); margin: 0; color: var(--ink-soft); }
+
+.ghost-btn {
+  font-style: italic; font-size: 1.05rem;
+  background: transparent; color: var(--muted);
+  border: 1px solid rgba(185,162,131,.4); border-radius: 999px;
+  padding: 8px 20px; cursor: pointer; transition: color .2s, border-color .2s;
+}
+.ghost-btn:hover { color: var(--parch); border-color: var(--parch); }
+.ghost-btn:focus-visible, .ink-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+#view-thu.is-open .stage, #view-thu.is-open .hint { display: none; }
+#view-thu:not(.is-open) .letter-wrap { display: none; }
+
+@keyframes unfold {
+  0% { opacity: 0; transform: translateY(50px) scale(.9) rotate(-2deg); filter: blur(2px); }
+  60% { opacity: 1; filter: none; }
+  100% { opacity: 1; transform: rotate(0.4deg); }
+}
+@keyframes inkIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+#view-thu.is-open .letter { animation: unfold 1.1s cubic-bezier(.2,.8,.25,1) both; }
+#view-thu.is-open .letter > * { animation: inkIn .9s ease both; }
+#view-thu.is-open .letter > *:nth-child(1) { animation-delay: .7s; }
+#view-thu.is-open .letter > *:nth-child(2) { animation-delay: .9s; }
+#view-thu.is-open .letter > *:nth-child(3) { animation-delay: 1.1s; }
+#view-thu.is-open .letter-wrap > .ghost-btn { animation: inkIn .6s ease 1.8s both; }
+.envelope.opening .seal { opacity: 0; transform: scale(.5) rotate(30deg); }
+.envelope.opening .flap { transform: scaleY(-1); transform-origin: top; transition: transform .5s ease .15s; }
+.envelope.opening { animation: away .6s ease .35s forwards; }
+@keyframes away { to { transform: translateY(24px) scale(.96); opacity: 0; } }
+
+/* ---------- Tiêu đề từng trang ---------- */
+.view-head { text-align: center; display: grid; gap: 4px; }
+.view-head h1 {
+  font-family: var(--font-script); font-weight: 400;
+  font-size: clamp(2.6rem, 9vw, 3.8rem); line-height: 1.1; margin: 0;
+  color: var(--parch); text-wrap: balance;
+}
+.view-head p { margin: 0; font-style: italic; color: var(--muted); font-size: 1.1rem; }
+
+/* ---------- Love Journal ---------- */
+.album {
+  --cols: 3;
+  width: 100%;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: 0 28px;
+  padding-block: 8px;
+}
+.album-col { display: flex; flex-direction: column; gap: 36px; min-width: 0; }
+
+/* Họa tiết lấp chỗ trống */
+.deco {
+  position: relative; min-height: 0;
+  display: grid; place-items: center; align-content: center; gap: 10px;
+  text-align: center; padding: 22px 18px; color: var(--ink);
+  transform: rotate(var(--tilt, 1.2deg));
+  box-shadow: 0 12px 24px rgba(0,0,0,.4), 0 2px 4px rgba(0,0,0,.25);
+}
+.deco .tape {
+  position: absolute; top: -11px; left: 50%; translate: -50% 0;
+  width: 92px; height: 24px; transform: rotate(-4deg);
+  background: rgba(232, 214, 176, .72);
+  box-shadow: 0 1px 2px rgba(0,0,0,.15);
+}
+.deco-quote { background: var(--parch); --tilt: -1.4deg; }
+.deco-quote p { margin: 0; font-family: var(--font-script); font-size: 1.75rem; line-height: 1.25; max-width: 15ch; text-wrap: balance; }
+.deco-quote .orn { color: var(--gold); font-size: 1.3rem; }
+.deco-flower {
+  --tilt: 2deg;
+  background-color: #efe4cc;
+  background-image: radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(120,80,35,.22) 100%);
+}
+.deco-flower svg { height: min(70%, 170px); width: auto; max-width: 100%; opacity: .88; }
+.deco-flower small { font-style: italic; color: var(--ink-soft); font-size: .95rem; }
+.deco-ticket {
+  --tilt: -2.2deg;
+  background: #e5cd9c;
+  -webkit-mask: radial-gradient(circle 12px at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat,
+                radial-gradient(circle 12px at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat;
+          mask: radial-gradient(circle 12px at 0 50%, transparent 98%, #000) left / 51% 100% no-repeat,
+                radial-gradient(circle 12px at 100% 50%, transparent 98%, #000) right / 51% 100% no-repeat;
+}
+.deco-ticket .tk {
+  border: 1.5px dashed rgba(90,55,20,.5); padding: 14px 16px;
+  display: grid; gap: 4px; width: 100%;
+}
+.deco-ticket small { font-size: .78rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-soft); }
+.deco-ticket strong { font-family: var(--font-script); font-weight: 400; font-size: 1.9rem; line-height: 1.15; color: var(--wax); }
+.deco-seal { background: none; box-shadow: none; --tilt: 0deg; color: var(--muted); }
+.deco-seal .wax {
+  width: 68px; aspect-ratio: 1; display: grid; place-items: center;
+  border-radius: 47% 53% 50% 50% / 52% 48% 52% 48%;
+  background: radial-gradient(circle at 35% 30%, var(--wax-hi), var(--wax) 55%, #5a1215 100%);
+  box-shadow: 0 4px 8px rgba(0,0,0,.45), inset 0 -3px 6px rgba(0,0,0,.35);
+  color: #4a0c0e; font-size: 1.7rem;
+}
+.deco-seal p { margin: 0; font-style: italic; font-size: 1.1rem; line-height: 1.4; }
+.deco-stamps { background: none; box-shadow: none; --tilt: 0deg; color: var(--muted); }
+.deco-stamps .st {
+  width: 62px; aspect-ratio: 4 / 5; display: grid; place-items: center;
+  background: radial-gradient(circle at 50% 45%, #a77a52 0%, #6e4a2b 75%);
+  outline: 4px solid #efe2c4; color: #f1e4c6; font-size: 1.5rem;
+  transform: rotate(-6deg); box-shadow: 0 6px 12px rgba(0,0,0,.4);
+}
+.deco-stamps .st2 { background: radial-gradient(circle at 50% 45%, #c0645a 0%, #7d2a2c 75%); transform: rotate(5deg) translate(26px, -40px); margin-bottom: -40px; }
+.deco-stamps p { margin: 0; font-style: italic; font-size: 1.1rem; }
+.memory {
+  background: #f4ead3;
+  color: var(--ink);
+  padding: 12px 12px 16px;
+  box-shadow: 0 14px 28px rgba(0,0,0,.45), 0 2px 4px rgba(0,0,0,.3);
+  transform: rotate(var(--tilt, -1.5deg));
+  transition: transform .3s ease;
+  display: grid; gap: 8px; align-content: start;
+  min-width: 0;
+  position: relative;
+}
+.memory:nth-child(3n+2) { --tilt: 1.8deg; }
+.memory:nth-child(3n) { --tilt: -0.6deg; }
+.memory:hover { transform: rotate(0deg) translateY(-3px); }
+.memory .photo {
+  position: relative; max-width: 100%; min-height: 160px;
+  background: #d9c7a2; overflow: hidden;
+}
+.memory .photo img {
+  width: 100%; height: auto; display: block;
+  filter: sepia(.12) contrast(1.02);
+}
+.memory .photo .missing {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-style: italic; color: var(--ink-soft); padding: 12px; text-align: center;
+}
+/* góc dán ảnh */
+.memory .photo::before, .memory .photo::after {
+  content: ""; position: absolute; width: 30px; height: 30px; z-index: 1;
+  background: linear-gradient(135deg, #5a3a22 50%, transparent 50%);
+  opacity: .85;
+}
+.memory .photo::before { top: 0; left: 0; }
+.memory .photo::after { bottom: 0; right: 0; transform: rotate(180deg); }
+.memory h3 {
+  font-family: var(--font-script); font-weight: 400;
+  font-size: 1.9rem; line-height: 1.1; margin: 4px 0 0; overflow-wrap: anywhere;
+}
+.memory .when { font-style: italic; color: var(--ink-soft); font-size: 1rem; margin: 0; }
+.memory .note { margin: 0; font-size: 1.1rem; line-height: 1.45; overflow-wrap: anywhere; }
+.memory .remove {
+  justify-self: end; background: none; border: 0; cursor: pointer;
+  color: var(--wax); font-style: italic; font-size: .95rem; padding: 2px 4px;
+}
+.memory .remove:focus-visible { outline: 1px solid var(--wax); }
+
+.empty {
+  width: min(560px, 100%); text-align: center;
+  border: 1px dashed rgba(185,162,131,.45);
+  padding: 36px 20px; color: var(--muted); font-style: italic; font-size: 1.15rem;
+  display: grid; gap: 6px;
+}
+.empty strong { font-family: var(--font-script); font-weight: 400; font-style: normal; font-size: 2rem; color: var(--parch); }
+
+/* Biểu mẫu kiểu giấy */
+.form-card { width: min(640px, 100%); }
+.form-card h2 {
+  font-family: var(--font-script); font-weight: 400; font-size: 2.2rem;
+  margin: 0 0 6px; line-height: 1.1;
+}
+.form-card .sub { margin: 0 0 18px; font-style: italic; color: var(--ink-soft); font-size: 1.05rem; }
+.fields { display: grid; gap: 14px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label { font-size: .85rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); }
+.field input[type=text], .field input[type=date], .field textarea {
+  width: 100%;
+  background: transparent; color: var(--ink);
+  border: 0; border-bottom: 1px solid rgba(120,80,35,.45);
+  padding: 6px 2px; font-size: 1.2rem; font-style: italic;
+  color-scheme: light;
+}
+.field textarea { resize: vertical; min-height: 5.5em; line-height: 1.5; border: 1px solid rgba(120,80,35,.35); padding: 8px 10px; }
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--wax); }
+.field input[type=file] { font-size: 1rem; color: var(--ink-soft); max-width: 100%; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 6px; }
+.ink-btn {
+  background: var(--wax); color: #f7e6dc; border: 0;
+  padding: 10px 22px; font-size: 1.1rem; font-style: italic; cursor: pointer;
+  box-shadow: 0 2px 0 #5a1215; border-radius: 2px;
+}
+.ink-btn:hover { background: #a3292b; }
+.ink-btn:disabled { opacity: .55; cursor: default; }
+.status { font-style: italic; color: var(--ink-soft); font-size: 1rem; margin: 0; }
+.status.err { color: var(--wax); }
+.dark-status { color: var(--muted); }
+
+/* ---------- Thang đo ---------- */
+.scale-q { margin: 0 0 10px; font-size: 1.25rem; }
+.hearts { display: flex; flex-wrap: wrap; gap: 4px; }
+.heart {
+  width: 42px; height: 42px; display: grid; place-items: center;
+  background: none; border: 1px solid transparent; cursor: pointer; border-radius: 50%;
+  font-size: 1.6rem; line-height: 1; color: rgba(120,80,35,.35);
+  transition: color .15s, transform .15s;
+}
+.heart.on { color: var(--wax); }
+.heart:hover { transform: scale(1.12); }
+.heart:focus-visible { outline: 1px solid var(--wax); }
+.scale-ends { display: flex; justify-content: space-between; font-style: italic; color: var(--ink-soft); font-size: .95rem; max-width: 460px; }
+.scale-label { font-family: var(--font-script); font-size: 2rem; color: var(--wax); min-height: 1.3em; margin: 6px 0 0; line-height: 1.3; }
+.copy-box { display: grid; gap: 8px; margin-top: 10px; }
+.copy-box pre {
+  white-space: pre-wrap; margin: 0; font-family: var(--font-text); font-size: 1.05rem;
+  background: rgba(120,80,35,.08); padding: 10px 12px; border: 1px solid rgba(120,80,35,.25);
+}
+
+/* Hộp thư của người viết */
+.inbox { width: min(640px, 100%); display: grid; gap: 16px; }
+.inbox h2 { font-family: var(--font-script); font-weight: 400; font-size: 2.4rem; margin: 0; text-align: center; color: var(--parch); }
+.inbox .lead { margin: 0; text-align: center; font-style: italic; color: var(--muted); }
+.reply {
+  background: #f4ead3; color: var(--ink); padding: 18px 20px;
+  box-shadow: 0 10px 22px rgba(0,0,0,.4);
+  display: grid; gap: 6px; min-width: 0;
+}
+.reply .top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; align-items: baseline; }
+.reply .who { font-family: var(--font-script); font-size: 1.9rem; line-height: 1.1; overflow-wrap: anywhere; }
+.reply .time { font-style: italic; color: var(--ink-soft); font-size: .95rem; }
+.reply .score { color: var(--wax); letter-spacing: .1em; font-size: 1.1rem; }
+.reply .score b { font-weight: 600; letter-spacing: 0; color: var(--ink); margin-left: 6px; }
+.reply .msg { margin: 0; font-size: 1.15rem; line-height: 1.5; font-style: italic; white-space: pre-wrap; overflow-wrap: anywhere; }
+.reply details { font-size: .95rem; color: var(--ink-soft); }
+.reply details ul { margin: 6px 0 0; padding-left: 18px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <nav class="nav" aria-label="Các trang">
+    <a href="#thu" data-view="thu">Đôi lời nhắn nhủ</a>
+    <span class="sep" aria-hidden="true">❧</span>
+    <a href="#ky-niem" data-view="ky-niem">Love Journal</a>
+    <span class="sep" aria-hidden="true">❧</span>
+    <a href="#danh-gia" data-view="danh-gia">Bạn có điều gì muốn nói không?</a>
+  </nav>
+
+  <!-- ===== Bức thư ===== -->
+  <section class="view" id="view-thu" data-name="thu">
+    <p class="hint">Có một lá thư dành cho bạn<span>❧</span>Chạm vào con dấu để mở</p>
+    <div class="stage">
+      <button class="envelope" id="envelope" type="button" aria-label="Mở thư">
+        <span class="env-paper">
+          <span class="flap-shadow"></span>
+          <span class="flap"></span>
+          <span class="address">
+            <span class="to-label">Kính gửi</span>
+            <span class="to-name" data-field="recipient"></span>
+          </span>
+        </span>
+        <span class="stamp"><span class="stamp-inner"><span>♥</span><small>VIỆT NAM</small></span></span>
+        <span class="postmark" data-field="postmark"></span>
+        <span class="seal" aria-hidden="true"><span data-field="initial"></span></span>
+      </button>
+    </div>
+    <div class="letter-wrap">
+      <article class="paper letter" aria-label="Nội dung thư">
+        <p class="letter-date" data-field="date"></p>
+        <p class="letter-greeting" data-field="greeting"></p>
+        <div class="ruled">
+          <div class="letter-body" id="letter-body"></div>
+          <p class="fleuron" aria-hidden="true">❦</p>
+          <div class="letter-closing">
+            <p class="close-word" data-field="closing"></p>
+            <p class="signature" data-field="signature"></p>
+          </div>
+          <p class="ps" data-field="ps"></p>
+        </div>
+      </article>
+      <button class="ghost-btn" id="fold" type="button">Gấp thư lại</button>
+    </div>
+  </section>
+
+  <!-- ===== Love Journal ===== -->
+  <section class="view" id="view-ky-niem" data-name="ky-niem" hidden>
+    <header class="view-head">
+      <h1>Love Journal</h1>
+      <p>Những khoảnh khắc của chúng mình, xếp theo ngày tháng</p>
+    </header>
+
+    <form class="paper form-card" id="journal-form" hidden>
+      <h2>Thêm một kỷ niệm</h2>
+      <p class="sub">Chỉ bạn thấy khung này. Người nhận chỉ xem được album.</p>
+      <div class="fields">
+        <div class="field">
+          <label for="j-photo">Ảnh kỷ niệm</label>
+          <input type="file" id="j-photo" accept="image/png,image/jpeg,image/webp,image/gif" required>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="j-title">Tiêu đề</label>
+            <input type="text" id="j-title" maxlength="80" placeholder="Lần đầu gặp nhau" required>
+          </div>
+          <div class="field">
+            <label for="j-date">Ngày</label>
+            <input type="date" id="j-date" required>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="ink-btn" type="submit" id="j-submit">Dán vào album</button>
+          <p class="status" id="j-status" role="status"></p>
+        </div>
+      </div>
+    </form>
+
+    <div class="album" id="album"></div>
+    <div class="empty" id="album-empty">
+      <strong>Album còn trống</strong>
+      <span id="album-empty-text">Những tấm ảnh kỷ niệm sẽ được dán vào đây.</span>
+    </div>
+  </section>
+
+  <!-- ===== Thang đo tình yêu ===== -->
+  <section class="view" id="view-danh-gia" data-name="danh-gia" hidden>
+    <header class="view-head">
+      <h1>Bạn có điều gì muốn nói không?</h1>
+      <p>Đọc xong thư rồi, cho người viết biết bạn cảm thấy thế nào nhé</p>
+    </header>
+
+    <form class="paper form-card" id="fb-form">
+      <p class="scale-q">Tình cảm của bạn dành cho người viết thư lúc này là bao nhiêu?</p>
+      <div class="hearts" id="hearts" role="radiogroup" aria-label="Mức điểm từ 1 đến 10"></div>
+      <div class="scale-ends"><span>1 · hơi yêu</span><span>10 · yêu quá trời yêu luôn</span></div>
+      <p class="scale-label" id="scale-label" aria-live="polite"></p>
+      <div class="fields" style="margin-top:14px">
+        <div class="field">
+          <label for="fb-msg">Lời nhắn gửi lại</label>
+          <textarea id="fb-msg" maxlength="2000" placeholder="Điều bạn muốn nói sau khi đọc thư..."></textarea>
+        </div>
+        <div class="actions">
+          <button class="ink-btn" type="submit" id="fb-submit">Gửi cho người viết</button>
+          <p class="status" id="fb-status" role="status"></p>
+        </div>
+        <div class="copy-box" id="fb-copy" hidden>
+          <p class="status">Trang chưa gửi được thay bạn. Hãy chép lời nhắn dưới đây và gửi lại cho người viết thư nhé.</p>
+          <pre id="fb-copy-text"></pre>
+          <div class="actions"><button class="ink-btn" type="button" id="fb-copy-btn">Chép lời nhắn</button></div>
+        </div>
+      </div>
+    </form>
+
+    <section class="inbox" id="inbox" hidden aria-label="Phản hồi đã nhận">
+      <h2>Hồi âm đã nhận</h2>
+      <p class="lead" id="inbox-lead">Chỉ bạn thấy phần này. Phản hồi mới hiện ra ngay khi người nhận bấm gửi.</p>
+      <div id="inbox-list" style="display:grid;gap:16px"></div>
+    </section>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   NỘI DUNG THƯ — đây là chỗ để điền nội dung của bạn.
+   (Hiện đang là nội dung mẫu.)
+   ============================================================ */
+const LETTER = {
+  recipient: "hph",
+  initial: "",               // chữ trên con dấu sáp; để trống thì lấy chữ cái đầu của tên ký
+  date: "Ngày 19 tháng 11 năm 2026",
+  postmark: "19 · XI\n2026",
+  greeting: "Gửi hph (1 nửa của mtuan),",
+  paragraphs: [
+    "Xin chào hph (ng béo nhất thế giớiiiii) thì hôm nay là anni 3 tháng của chúng mìn!!! oài đúng là yêu xa khó thật =)) cảm giác như yêu xa t ph học cách yêu lại từ đầu b ạaa. nma t thì thấy chả khó khăn xíu nào tại t vẫn được làm 1 phần nhỏ bé xíu xiu trong cuộc sống của hoài phương ạ. =))",
+    "T thấy như ani 3m lần đầu tại t siêu tâm huyết và cũng đồng thời rất mong ngóng đến ngày hôm nay đó. t bít đoạn đường phía trước sẽ còn nhiều khó khăn lắm b nhưng màaa tui vẫn sẽ là tui thoai. tôi vẫn sẽ yêu b nhiều như z, vẫn sẽ luôn cố gắng để trở thành phiên bản tốt nhất của bản thân để có thể làm chỗ dựa vững chãi nhất cho b.",
+    "T nhớ b siêu siêu nhiều và t rất mong ngày mình gặp lại nhauuu. có nhìu cái trong tgian yêu xa t vẫn khiến b ph buồn ;-; t xin lỗi nhá nhưnggg t hứa là dần dần t sẽ hoàn thiện bản thân hơn để t có thể đi với b thêm 1 đoạn dài dài dài siêu dài nữa. cảm ơn b vì đã tin tưởng tui."
+  ],
+  closing: "from ng béo thứ nhì tgioi của hph,",
+  signature: "mtuan",
+  ps: "" // Tái bút (để trống nếu không cần)
+};
+
+/* Google Form nhận hồi âm (điền từ link điền sẵn của form) */
+const GOOGLE_FORM = {
+  action: "https://docs.google.com/forms/d/e/1FAIpQLSf9xdDN1nVjWPpyx39Ko8FkFJDT_INS2fNvw2xWpv8qlwPlpg/formResponse",
+  scoreField: "entry.777828694",   // câu "Mức tình cảm"
+  messageField: "entry.1569355731"  // câu "Lời nhắn"
+};
+
+const SCALE = {
+  1: "Hơi yêu", 2: "Yêu yêu", 3: "Yêu kha khá", 4: "Yêu nhiều nè",
+  5: "Yêu nhiều lắm", 6: "Yêu dữ lắm", 7: "Yêu cực kỳ", 8: "Yêu muốn xỉu",
+  9: "Yêu hết cỡ", 10: "Yêu quá trời yêu luôn"
+};
+
+const $ = id => document.getElementById(id);
+
+/* ---------- Thư ---------- */
+(function renderLetter() {
+  const data = Object.assign({}, LETTER);
+  if (!data.initial) data.initial = (data.signature || "♥").trim().charAt(0);
+  document.querySelectorAll("[data-field]").forEach(el => {
+    const key = el.dataset.field, val = data[key] || "";
+    if (key === "postmark") {
+      el.textContent = "";
+      val.split("\n").forEach((line, i) => {
+        if (i) el.appendChild(document.createElement("br"));
+        el.appendChild(document.createTextNode(line));
+      });
+    } else if (key === "ps") {
+      el.textContent = val ? "T.B. " + val : "";
+      el.hidden = !val;
+    } else el.textContent = val;
+  });
+  const body = $("letter-body");
+  data.paragraphs.forEach(t => { const p = document.createElement("p"); p.textContent = t; body.appendChild(p); });
+})();
+
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const viewThu = $("view-thu");
+$("envelope").addEventListener("click", () => {
+  const env = $("envelope");
+  if (reduce) { viewThu.classList.add("is-open"); $("fold").focus(); return; }
+  env.classList.add("opening");
+  setTimeout(() => { viewThu.classList.add("is-open"); env.classList.remove("opening"); window.scrollTo({ top: 0 }); }, 950);
+});
+$("fold").addEventListener("click", () => { viewThu.classList.remove("is-open"); $("envelope").focus(); });
+
+/* ---------- Điều hướng theo #hash ---------- */
+const VIEWS = ["thu", "ky-niem", "danh-gia"];
+function route() {
+  const h = location.hash.replace("#", "");
+  const name = VIEWS.includes(h) ? h : "thu";
+  document.querySelectorAll(".view").forEach(v => { v.hidden = v.dataset.name !== name; });
+  document.querySelectorAll(".nav a").forEach(a => {
+    if (a.dataset.view === name) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+  });
+}
+window.addEventListener("hashchange", () => { route(); window.scrollTo({ top: 0 }); });
+route();
+
+/* ---------- Thang đo: giao diện ---------- */
+let score = 0;
+const hearts = $("hearts");
+for (let i = 1; i <= 10; i++) {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "heart"; b.textContent = "♥";
+  b.id = "heart-" + i;
+  b.setAttribute("role", "radio");
+  b.setAttribute("aria-label", i + " — " + SCALE[i]);
+  b.addEventListener("click", () => setScore(i));
+  hearts.appendChild(b);
+}
+function setScore(n) {
+  score = n;
+  [...hearts.children].forEach((b, i) => {
+    b.classList.toggle("on", i < n);
+    b.setAttribute("aria-checked", i + 1 === n ? "true" : "false");
+  });
+  $("scale-label").textContent = n ? n + "/10 · " + SCALE[n] : "";
+}
+setScore(0);
+
+function fmtTime(iso) {
+  try { return new Date(iso).toLocaleString("vi-VN", { dateStyle: "medium", timeStyle: "short" }); } catch (e) { return iso || ""; }
+}
+function fmtDate(d) {
+  if (!d) return "";
+  const [y, m, day] = d.split("-");
+  if (y && m && day) return "Ngày " + Number(day) + " tháng " + Number(m) + " năm " + y;
+  if (y && m) return "Tháng " + Number(m) + " năm " + y;
+  return d;
+}
+function composeText() {
+  const msg = $("fb-msg").value.trim();
+  return "Điều mình muốn nói — mức tình cảm: " + (score ? score + "/10 (" + SCALE[score] + ")" : "chưa chọn") +
+    (msg ? "\nLời nhắn: " + msg : "");
+}
+function showCopyFallback() {
+  $("fb-copy-text").textContent = composeText();
+  $("fb-copy").hidden = false;
+}
+$("fb-copy-btn").addEventListener("click", () => {
+  const text = $("fb-copy-text").textContent;
+  const done = () => { $("fb-copy-btn").textContent = "Đã chép"; };
+  const fallback = () => {
+    const r = document.createRange(); r.selectNodeContents($("fb-copy-text"));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    $("fb-copy-btn").textContent = "Đã chọn sẵn, hãy bấm sao chép";
+  };
+  try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+});
+
+/* ---------- Kết nối dữ liệu ---------- */
+const S = { db: null, user: null, assets: null, uid: null, owner: false };
+
+async function boot() {
+  const use = n => (window.claude && window.claude.use) ? window.claude.use(n).catch(() => null) : Promise.resolve(null);
+  const [db, user, assets] = await Promise.all([use("db"), use("user"), use("assets")]);
+  S.db = db; S.user = user; S.assets = assets;
+  S.owner = user ? await user.isOwner() : false;
+  S.uid = user ? await user.id() : null;
+  initJournal();
+  initFeedback();
+}
+
+/* ---------- Love Journal ---------- */
+function initJournal() {
+  const album = $("album"), empty = $("album-empty");
+  if (S.owner && S.assets && S.db) {
+    $("journal-form").hidden = false;
+    $("album-empty-text").textContent = "Thêm tấm ảnh đầu tiên bằng khung phía trên.";
+  }
+  const useStatic = () => { journalDocs = JOURNAL_STATIC; empty.hidden = true; layoutAlbum(); };
+  if (!S.db) { useStatic(); return; }
+
+  let loaded = false;
+  const timer = setTimeout(() => { if (!loaded && !journalDocs.length) useStatic(); }, 10000);
+
+  S.db.collection("journal").orderBy("date", "asc").onSnapshot(snap => {
+    if (!snap.metadata.fromCache) { loaded = true; clearTimeout(timer); }
+    journalDocs = snap.docs.map(d => ({ id: d.id, data: d.data() }));
+    empty.hidden = !snap.empty;
+    layoutAlbum();
+  }, () => { clearTimeout(timer); if (!journalDocs.length) useStatic(); });
+}
+
+/* Bản sao album gắn sẵn trong trang, cho người xem qua link công khai (không đăng nhập) */
+const JOURNAL_STATIC = [
+  { id: "m5", data: { asset: "ky-niem-5.jpg", title: "Sweet as you are", date: "2026-01-19" } },
+  { id: "m4", data: { asset: "ky-niem-4.jpg", title: "Best birthday ever", date: "2026-02-12" } },
+  { id: "m1", data: { asset: "ky-niem-1.jpg", title: "First date" } },
+  { id: "m2", data: { asset: "ky-niem-2.jpg", title: "So cute" } },
+  { id: "m3", data: { asset: "ky-niem-3.jpg", title: "Cái Tết đầu tiên cùng nhau" } }
+];
+
+/* Xếp ảnh so le theo cột, rồi lấp chỗ trống cuối mỗi cột bằng họa tiết */
+let journalDocs = [], layoutToken = 0;
+const ratioCache = {};
+const GAP = 36;
+function colCount() {
+  const w = $("album").clientWidth || window.innerWidth;
+  return w >= 760 ? 3 : w >= 500 ? 2 : 1;
+}
+function ratioOf(asset) {
+  return new Promise(res => {
+    const im = new Image();
+    im.onload = () => res(im.naturalHeight / im.naturalWidth || 1.25);
+    im.onerror = () => res(1.25);
+    im.src = "anh/" + asset;
+  });
+}
+async function layoutAlbum() {
+  const token = ++layoutToken;
+  const album = $("album");
+  if (!journalDocs.length) { album.textContent = ""; return; }
+  const n = colCount();
+  const ratios = await Promise.all(journalDocs.map(d => {
+    const a = d.data.asset;
+    if (!a) return 1.25;
+    if (!ratioCache[a]) ratioCache[a] = ratioOf(a);
+    return ratioCache[a];
+  }));
+  if (token !== layoutToken) return;
+  album.style.setProperty("--cols", n);
+  album.textContent = "";
+  const cols = Array.from({ length: n }, () => {
+    const c = document.createElement("div"); c.className = "album-col"; album.appendChild(c); return c;
+  });
+  const h = new Array(n).fill(0);
+  journalDocs.forEach((d, i) => {
+    const k = h.indexOf(Math.min(...h));
+    cols[k].appendChild(memoryCard(d.id, d.data));
+    h[k] += ratios[i] + 0.4;
+  });
+  await Promise.all([...album.querySelectorAll("img")].map(im => im.complete ? 0 :
+    new Promise(r => { im.addEventListener("load", r, { once: true }); im.addEventListener("error", r, { once: true }); })));
+  if (token !== layoutToken || n < 2) return;
+  fillGaps(cols);
+}
+function contentBottom(c) {
+  const last = c.lastElementChild;
+  return last ? last.offsetTop + last.offsetHeight : c.offsetTop;
+}
+function fillGaps(cols) {
+  const bottom = Math.max(...cols.map(contentBottom));
+  let idx = 0;
+  cols.forEach(c => {
+    let room = bottom - contentBottom(c) - GAP;
+    while (room >= 140) {
+      const deco = makeDeco(idx++);
+      const hgt = room <= 420 ? room : 260;
+      deco.style.height = hgt + "px";
+      c.appendChild(deco);
+      room -= hgt + GAP;
+    }
+  });
+}
+const FLOWER_SVG = '<svg viewBox="0 0 100 160" aria-hidden="true"><path d="M50 158 C48 120 52 90 50 48" stroke="#6d7a4a" stroke-width="2" fill="none"/><path d="M50 122 C35 114 28 102 30 93 C40 97 48 107 50 122Z" fill="#7d8a55"/><path d="M50 102 C64 96 72 86 70 77 C60 81 52 89 50 102Z" fill="#7d8a55"/><path d="M50 72 L34 63 M50 68 L66 59" stroke="#6d7a4a" stroke-width="1.5"/><g fill="#c9a0b0"><circle cx="34" cy="63" r="4"/><circle cx="29" cy="55" r="3.5"/><circle cx="66" cy="59" r="4"/><circle cx="71" cy="51" r="3.5"/></g><g fill="#b4566a"><circle cx="50" cy="40" r="11"/><circle cx="39" cy="32" r="9"/><circle cx="61" cy="32" r="9"/><circle cx="44" cy="21" r="8"/><circle cx="56" cy="21" r="8"/></g><circle cx="50" cy="30" r="6" fill="#8e2f43"/></svg>';
+const DECOS = [
+  '<div class="deco deco-quote"><span class="tape"></span><p>Có những ngày bình thường bỗng hóa thành kỷ niệm, chỉ vì có nhau.</p><span class="orn">❦</span></div>',
+  '<div class="deco deco-flower"><span class="tape"></span>' + FLOWER_SVG + '<small>Hoa ép · mùa đầu tiên</small></div>',
+  '<div class="deco deco-ticket"><div class="tk"><small>Vé kỷ niệm</small><strong>Dành cho hai người</strong><small>Số 0001 · Không hết hạn</small></div></div>',
+  '<div class="deco deco-seal"><span class="wax">♥</span><p>Niêm phong những điều<br>chỉ hai ta biết</p></div>',
+  '<div class="deco deco-stamps"><span class="st">♥</span><span class="st st2">✶</span><p>Gửi từ trái tim</p></div>'
+];
+function makeDeco(i) {
+  const t = document.createElement("template");
+  t.innerHTML = DECOS[i % DECOS.length];
+  return t.content.firstElementChild;
+}
+let resizeTimer;
+window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(layoutAlbum, 200); });
+window.addEventListener("hashchange", () => { if (location.hash === "#ky-niem") setTimeout(layoutAlbum, 0); });
+
+function memoryCard(id, m) {
+  const card = document.createElement("article");
+  card.className = "memory";
+  const photo = document.createElement("div"); photo.className = "photo";
+  if (m.asset) {
+    const img = document.createElement("img");
+    img.src = "anh/" + m.asset; img.alt = m.title || "Ảnh kỷ niệm"; img.loading = "lazy";
+    img.onerror = () => { img.remove(); const s = document.createElement("span"); s.className = "missing"; s.textContent = "Ảnh này không hiển thị được"; photo.appendChild(s); };
+    photo.appendChild(img);
+  }
+  const h = document.createElement("h3"); h.textContent = m.title || "";
+  card.append(photo, h);
+  if (m.date) { const w = document.createElement("p"); w.className = "when"; w.textContent = fmtDate(m.date); card.appendChild(w); }
+  if (S.owner && S.assets) {
+    const del = document.createElement("button");
+    del.type = "button"; del.className = "remove"; del.textContent = "Gỡ ảnh này";
+    let armed = false;
+    del.addEventListener("click", async () => {
+      if (!armed) { armed = true; del.textContent = "Bấm lần nữa để gỡ hẳn"; setTimeout(() => { armed = false; del.textContent = "Gỡ ảnh này"; }, 4000); return; }
+      del.disabled = true; del.textContent = "Đang gỡ…";
+      try {
+        await S.db.doc("journal/" + id).delete();
+        if (m.asset) await S.assets.delete(m.asset).catch(() => {});
+      } catch (e) { del.disabled = false; del.textContent = "Chưa gỡ được, thử lại"; }
+    });
+    card.appendChild(del);
+  }
+  return card;
+}
+
+$("journal-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const file = $("j-photo").files[0];
+  const status = $("j-status"), btn = $("j-submit");
+  status.className = "status";
+  if (!file) { status.textContent = "Hãy chọn một tấm ảnh."; return; }
+  if (file.size > 20 * 1024 * 1024) { status.className = "status err"; status.textContent = "Ảnh lớn hơn 20 MB, hãy chọn ảnh nhỏ hơn."; return; }
+  btn.disabled = true; status.textContent = "Đang dán ảnh vào album…";
+  try {
+    const up = await S.assets.upload(file);
+    await S.db.collection("journal").add({
+      asset: up.id,
+      title: $("j-title").value.trim(),
+      date: $("j-date").value,
+      createdAt: new Date().toISOString()
+    });
+    $("journal-form").reset();
+    status.textContent = "Đã dán vào album.";
+  } catch (err) {
+    status.className = "status err";
+    const c = err && err.code;
+    status.textContent = c === "unsupported_type" ? "Định dạng ảnh này chưa được hỗ trợ, hãy dùng JPG, PNG hoặc WEBP."
+      : c === "too_large" ? "Ảnh quá lớn, hãy chọn ảnh dưới 20 MB."
+      : c === "quota_or_state" ? "Album đã đầy dung lượng. Hãy gỡ bớt ảnh cũ."
+      : "Chưa dán được ảnh. Hãy thử lại.";
+  } finally { btn.disabled = false; }
+});
+
+/* ---------- Thang đo: gửi & hộp thư ---------- */
+function initFeedback() {
+  if (S.owner && S.db) initInbox();
+}
+
+$("fb-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const status = $("fb-status"), btn = $("fb-submit");
+  status.className = "status";
+  $("fb-copy").hidden = true;
+  if (!score) { status.className = "status err"; status.textContent = "Hãy chọn số trái tim trước khi gửi."; return; }
+  if (GOOGLE_FORM.action) {
+    btn.disabled = true; status.textContent = "Đang gửi…";
+    const body = new URLSearchParams();
+    body.append(GOOGLE_FORM.scoreField, score + "/10 · " + SCALE[score]);
+    body.append(GOOGLE_FORM.messageField, $("fb-msg").value.trim());
+    try {
+      await fetch(GOOGLE_FORM.action, { method: "POST", mode: "no-cors", body });
+      status.textContent = "Đã gửi tới người viết thư rồi nè 💌 Bạn có thể gửi thêm bất cứ lúc nào.";
+      $("fb-msg").value = "";
+    } catch (err) {
+      status.textContent = "";
+      showCopyFallback();
+    } finally { btn.disabled = false; }
+    return;
+  }
+  if (!S.db || !S.uid) { showCopyFallback(); return; }
+  btn.disabled = true; status.textContent = "Đang gửi…";
+  const now = new Date().toISOString();
+  const entry = { score, message: $("fb-msg").value.trim(), from: "", at: now };
+  const ref = S.db.doc("feedback/" + S.uid);
+  try {
+    let history = [];
+    try {
+      const prev = await ref.get();
+      if (prev.exists) history = (prev.data().history || []).slice(-19);
+    } catch (_) {}
+    history.push(entry);
+    await ref.set({ score: entry.score, message: entry.message, from: entry.from, updatedAt: now, history });
+    status.textContent = "Đã gửi tới người viết thư lúc " + fmtTime(now) + ". Bạn có thể gửi lại bất cứ lúc nào.";
+  } catch (err) {
+    status.textContent = "";
+    showCopyFallback();
+  } finally { btn.disabled = false; }
+});
+
+function initInbox() {
+  $("inbox").hidden = false;
+  const list = $("inbox-list"), lead = $("inbox-lead");
+  let loaded = false;
+  const timer = setTimeout(() => { if (!loaded) lead.textContent = "Chưa tải được hồi âm, hãy thử mở lại trang sau ít phút."; }, 10000);
+  S.db.collection("feedback").orderBy("updatedAt", "desc").onSnapshot(snap => {
+    if (!snap.metadata.fromCache) { loaded = true; clearTimeout(timer); }
+    list.textContent = "";
+    if (snap.empty) {
+      const p = document.createElement("p"); p.className = "lead"; p.style.color = "var(--muted)";
+      p.textContent = "Chưa có hồi âm nào. Khi người nhận bấm \"Gửi cho người viết\", lời nhắn sẽ hiện ở đây.";
+      list.appendChild(p); return;
+    }
+    snap.docs.forEach(d => list.appendChild(replyCard(d.data())));
+  }, () => { clearTimeout(timer); lead.textContent = "Hiện chưa tải được hồi âm."; });
+}
+
+function replyCard(r) {
+  const c = document.createElement("article"); c.className = "reply";
+  const top = document.createElement("div"); top.className = "top";
+  const who = document.createElement("span"); who.className = "who"; who.textContent = r.from || LETTER.recipient || "Người nhận";
+  const time = document.createElement("span"); time.className = "time"; time.textContent = fmtTime(r.updatedAt);
+  top.append(who, time);
+  const sc = document.createElement("div"); sc.className = "score";
+  const n = Math.max(0, Math.min(10, Number(r.score) || 0));
+  sc.textContent = "♥".repeat(n) + "♡".repeat(10 - n);
+  const b = document.createElement("b"); b.textContent = n + "/10 · " + (SCALE[n] || ""); sc.appendChild(b);
+  c.append(top, sc);
+  if (r.message) { const m = document.createElement("p"); m.className = "msg"; m.textContent = r.message; c.appendChild(m); }
+  const hist = Array.isArray(r.history) ? r.history.slice(0, -1).reverse() : [];
+  if (hist.length) {
+    const det = document.createElement("details");
+    const sum = document.createElement("summary"); sum.textContent = "Những lần gửi trước (" + hist.length + ")";
+    const ul = document.createElement("ul");
+    hist.forEach(h => {
+      const li = document.createElement("li");
+      li.textContent = fmtTime(h.at) + " · " + h.score + "/10" + (h.message ? " · " + h.message : "");
+      ul.appendChild(li);
+    });
+    det.append(sum, ul); c.appendChild(det);
+  }
+  return c;
+}
+
+boot();
+</script>
+</body>
+</html>
