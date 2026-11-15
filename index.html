@@ -512,7 +512,6 @@ button, input, textarea { font-family: inherit; }
   <section class="view" id="view-ky-niem" data-name="ky-niem" hidden>
     <header class="view-head">
       <h1>Love Journal</h1>
-      <p>Những khoảnh khắc của chúng mình, xếp theo ngày tháng</p>
     </header>
 
     <form class="paper form-card" id="journal-form" hidden>
@@ -541,10 +540,6 @@ button, input, textarea { font-family: inherit; }
     </form>
 
     <div class="album" id="album"></div>
-    <div class="empty" id="album-empty">
-      <strong>Album còn trống</strong>
-      <span id="album-empty-text">Những tấm ảnh kỷ niệm sẽ được dán vào đây.</span>
-    </div>
   </section>
 
   <!-- ===== Thang đo tình yêu ===== -->
@@ -575,12 +570,6 @@ button, input, textarea { font-family: inherit; }
         </div>
       </div>
     </form>
-
-    <section class="inbox" id="inbox" hidden aria-label="Phản hồi đã nhận">
-      <h2>Hồi âm đã nhận</h2>
-      <p class="lead" id="inbox-lead">Chỉ bạn thấy phần này. Phản hồi mới hiện ra ngay khi người nhận bấm gửi.</p>
-      <div id="inbox-list" style="display:grid;gap:16px"></div>
-    </section>
   </section>
 </div>
 
@@ -618,7 +607,7 @@ const SCALE = {
   9: "Yêu hết cỡ", 10: "Yêu quá trời yêu luôn"
 };
 
-const $ = id => document.getElementById(id);
+const $ = id => document.getElementById(id) || document.createElement("div");
 
 /* ---------- Thư ---------- */
 (function renderLetter() {
